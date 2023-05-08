@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+   
+    stages {
+        stage('Find URLs and AWS endpoints') {
+            steps {
+                script {
+                    def urls = []
+                    def awsEndpoints = []
+                   
+                    // Search for URLs
+                    def urlPattern = /"((http|https):\/\/)?[a-zA-Z0-9\/?=_-]+"/
+                    def htmlFiles = findFiles(glob: '**/*.html')
+                    htmlFiles.each { file ->
+                        urls.addAll(file.readLines().grep(urlPattern))
+                    }
+                   
+                    writeFile(file: 'urls.txt', text: urls.join('\n'))
+                   
+                    // Search for AWS endpoints
+                    def awsEndpointPattern = /"(https?:\/\/[a-z0-9-]+.execute-api.[a-z]+.amazonaws.com)"/
+                    def jsFiles = findFiles(glob: '**/*.js')
+                    jsFiles.each { file ->
+                        awsEndpoints.addAll(file.readLines().grep(awsEndpointPattern))
+                    }
+                   
+                    writeFile(file: 'aws_endpoints.txt', text: awsEndpoints.join('\n'))
+                   
+                    // Display search results
+                    echo "URLs found:"
+                    sh "cat urls.txt"
+                   
+                    echo "AWS endpoints found:"
+                    sh "cat aws_endpoints.txt"
+                }
+            }
+        }
+    }
+}
