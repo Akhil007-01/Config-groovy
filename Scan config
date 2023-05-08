@@ -1,0 +1,18 @@
+def fileDir = new File('.')
+def httpPattern = /https?:\/\/[\w\-\.]+(:\d+)?(\/[\w\-\.\/\?\%\&\=]*)?/i
+def awsPattern = /https?:\/\/[a-z0-9][a-z0-9\-\.]+\.amazonaws\.com(:\d+)?(\/[\w\-\.\/\?\%\&\=]*)?/i
+
+fileDir.eachFileMatch(~/(.*)/) { file ->
+    if (file.isFile()) {
+        file.eachLine { line ->
+            def matcherHttp = (line =~ httpPattern)
+            def matcherAws = (line =~ awsPattern)
+            if (matcherHttp.find()) {
+                println("HTTP URL found in file ${file.name}: ${matcherHttp.group()}")
+            }
+            if (matcherAws.find()) {
+                println("AWS endpoint found in file ${file.name}: ${matcherAws.group()}")
+            }
+        }
+    }
+}
