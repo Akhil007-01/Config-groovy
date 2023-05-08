@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+   
+    stages {
+        stage('Find URLs and AWS endpoints') {
+            steps {
+                sh '''
+                    # Search for URLs
+                    echo "Searching for URLs..."
+                    grep -Eio '"((http|https)://)?[a-zA-Z0-9./?=_-]+"' configs/* > urls.txt
+                   
+                    # Search for AWS endpoints
+                    echo "Searching for AWS endpoints..."
+                    grep -Eio '"(https?://[a-z0-9-]+.execute-api.[a-z]+.amazonaws.com)"' configs/* > aws_endpoints.txt
+                '''
+               
+                // Display search results
+                echo "URLs found:"
+                sh "cat urls.txt"
+               
+                echo "AWS endpoints found:"
+                sh "cat aws_endpoints.txt"
+            }
+        }
+    }
+}
